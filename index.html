@@ -3,73 +3,104 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
   <script src="js/vue.min.js"></script>
+  <script src="js/html2canvas.min.js"></script>
+  <script src="js/clipboard.min.js"></script>
   <title>Funny Subtitle Pic</title>
 </head>
 
 <style type="text/css">
   body {
     padding-top: 100px;
-    margin: 0;
-    background: #202020;
+    margin     : 0;
+    background : #202020;
   }
-  .image-message {
-    display: block;
-    position: fixed;
-    padding: 10px;
-    top: 0;
-    width: 100%;
+  #imageSubtitle {
+    display   : block;
+    position  : fixed;
+    padding   : 10px;
+    top       : 0;
+    width     : 100%;
     background: whitesmoke;
-    z-index: 1;
+    z-index   : 1;
   }
-  .image-message > input {
-    font-size: 20px;
-    text-align: center;
+  #imageSubtitle > input {
+    font-size    : 20px;
+    text-align   : center;
     border-radius: 7px;
-    border: 2px solid grey;
-    padding: 5px;
-    margin-right: 20px;
+    border       : 2px solid grey;
+    padding      : 5px;
+    margin-right : 20px;
   }
-  .image-preview {
-
+  #hint {
+    position: absolute;
+    right: 50px;
+    font-size: 30px;
+  }
+  #imagePreview  {
   }
   .image-card {
-    display: inline-block;
-    margin: 15px;
+    display : inline-block;
+    margin  : 15px;
     position: relative;
-    width: 300px;
-    height: 300px;
+    width   : 300px;
+    height  : 300px;
+    cursor  : pointer;
   }
   .image-card > img {
-    width: 100%;
+    width : 100%;
     height: 100%;
   }
-  .image-card > .image-card-message {
-    font-size: 25px;
-    position: absolute;
-    bottom: 0px;
-    width: 100%;
-    text-align: center;
-    color: white;
-    padding: 5px 0;
+  .image-card > .image-card-subtitle {
+    font-size  : 25px;
+    position   : absolute;
+    bottom     : 0px;
+    width      : 100%;
+    text-align : center;
+    color      : white;
+    background : black;
+    margin     : 0;
+    padding    : 5px 0;
+    white-space: normal;
+  }
+  #picToCopy {
+    height: 0;
+    width: 0;
+  }
+  #successInfo {
+    position: fixed;
+    top: 40%;
+    z-index: 2;
     background: black;
+    width: 100%;
+    padding: 30px 0;
+    text-align: center;
+    font-family: monospace;
+    color: white;
+    font-size: 50px;
+    border-top: 3px solid white;
+    border-bottom: 3px solid white;
   }
 </style>
 
 <body>
   <div id="app">
-    <div class="image-message">
+    <div id="imageSubtitle">
       <strong>Subtitle:</strong>
-      <input v-model="message" style="width: 300px;">
+      <input v-model="subtitle" style="width: 300px;">
       <strong>Font Size:</strong>
       <input type="number" min="10" max="50" step="1" v-model="fontSize" style="width: 100px;">
+      <strong id="hint">CLICK IMAGE TO COPY!</strong>
     </div>
 
-    <div class="image-preview">
-      <div class="image-card" v-for="id in IMAGE_COUNT" :key="id">
+    <div id="imagePreview">
+      <div class="image-card" v-for="id in IMAGE_COUNT" :key="id" :id="'image-' + id" @click.stop="getPicBase64(id)">
         <img :src="getImagePath(id)">
-        <div class="image-card-message" :style="{'font-size': fontSize + 'px'}">{{ message }}</div>
+        <pre class="image-card-subtitle" :style="{'font-size': fontSize + 'px'}">{{ subtitle }}</pre>
       </div>
     </div>
+
+    <img id="picToCopy">
+    <div v-show="showSuccessInfo" id="successInfo">Copied to clipboard!</div>
   </div>
 </body>
 
@@ -77,8 +108,9 @@
 var app = new Vue({
   el: '#app',
   data: {
-    message : 'SHOW ME YOUR CODE',
+    subtitle : 'SHOW ME YOUR CODE',
     fontSize: '25',
+    showSuccessInfo: false,
   },
   computed: {
     IMAGE_COUNT()     { return 37 },
@@ -89,7 +121,52 @@ var app = new Vue({
       id = ('000' + id).slice(-3);
       return 'img/' + id + '.jpg';
     },
+    getPicBase64(id) {
+      var el = document.getElementById('image-' + id);
+      let opt = {
+        scale     : 1,
+        logging   : false,
+        useCORS   : true,
+        allowTaint: true,
+        width     : 300,
+        height    : 300,
+        x         : el.offsetLeft,
+        y         : el.offsetTop,
+        ignoreElements: el => {
+          if (el.classList && el.classList.contains('image-subtitle')) {
+            return true;
+          }
+          return false;
+        },
+      }
+      html2canvas(document.body, opt).then(function(cavans) {
+        var picToCopy = document.getElementById('picToCopy');
+        picToCopy.src = cavans.toDataURL('image/png');
+
+        var selection = window.getSelection();
+        var range = document.createRange();
+
+        range.selectNode(picToCopy);
+        selection.removeAllRanges();
+        selection.addRange(range);
+
+        document.execCommand('copy');
+
+        app.showSuccessInfo = true;
+        setTimeout(function() {
+          app.showSuccessInfo = false;
+        }, 1500);
+      });
+    },
   },
 });
+function test() {
+  var selection = window.getSelection();
+  var range = document.createRange();
+  range.selectNode(document.getElementById('picToCopy'));
+  selection.removeAllRanges();
+  selection.addRange(range);
+  document.execCommand('copy');
+}
 </script>
 </html>
