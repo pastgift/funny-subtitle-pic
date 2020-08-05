@@ -87,15 +87,28 @@
     <div id="imageSubtitle">
       <strong>Subtitle:</strong>
       <input v-model="subtitle" style="width: 300px;">
+
       <strong>Font Size:</strong>
-      <input type="number" min="10" max="50" step="1" v-model="fontSize" style="width: 100px;">
+      <input type="number" min="10" max="50" step="1" v-model="fontSize" style="width: 60px;">
+
+      <strong>Image Size:</strong>
+      <input type="number" min="100" max="500" step="10" v-model="imageSize" style="width: 60px;">
+
       <strong id="hint">CLICK IMAGE TO COPY!</strong>
     </div>
 
     <div id="imagePreview">
-      <div class="image-card" v-for="id in IMAGE_COUNT" :key="id" :id="'image-' + id" @click.stop="getPicBase64(id)">
+      <div
+        class="image-card"
+        v-for="id in IMAGE_COUNT"
+        :style="{'width': imageSize + 'px', 'height': imageSize + 'px'}"
+        :key="id"
+        :id="'image-' + id"
+        @click.stop="getPicBase64(id)">
         <img :src="getImagePath(id)">
-        <pre class="image-card-subtitle" :style="{'font-size': fontSize + 'px'}">{{ subtitle }}</pre>
+        <pre
+          class="image-card-subtitle"
+          :style="{'font-size': imageSize * fontSize / 300 + 'px'}">{{ subtitle }}</pre>
       </div>
     </div>
 
@@ -107,10 +120,28 @@
 <script type="text/javascript">
 var app = new Vue({
   el: '#app',
-  data: {
-    subtitle : 'SHOW ME YOUR CODE',
-    fontSize: '25',
-    showSuccessInfo: false,
+  data() {
+    let subtitle  = localStorage.getItem('subtitle');
+    let fontSize  = parseInt(localStorage.getItem('fontSize'));
+    let imageSize = parseInt(localStorage.getItem('imageSize'));
+
+    return {
+      subtitle       : subtitle  || 'SHOW ME YOUR CODE',
+      fontSize       : fontSize  || '25',
+      imageSize      : imageSize || '300',
+      showSuccessInfo: false,
+    }
+  },
+  watch: {
+    subtitle(val) {
+      localStorage.setItem('subtitle', val);
+    },
+    fontSize(val) {
+      localStorage.setItem('fontSize', val);
+    },
+    imageSize(val) {
+      localStorage.setItem('imageSize', val);
+    },
   },
   computed: {
     IMAGE_COUNT()     { return 57 },
