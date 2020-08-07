@@ -14,7 +14,7 @@
     margin     : 0;
     background : #202020;
   }
-  #imageSubtitle {
+  #imageConfig {
     display   : block;
     position  : fixed;
     padding   : 10px;
@@ -23,13 +23,18 @@
     background: whitesmoke;
     z-index   : 1;
   }
-  #imageSubtitle > input {
+  #imageConfig > input {
     font-size    : 20px;
     text-align   : center;
     border-radius: 7px;
     border       : 2px solid grey;
     padding      : 5px;
-    margin-right : 20px;
+  }
+  #imageConfig > strong {
+    margin-left: 20px;
+  }
+  #imageConfig > small {
+    vertical-align: bottom;
   }
   #hint {
     position: absolute;
@@ -84,9 +89,10 @@
 
 <body>
   <div id="app">
-    <div id="imageSubtitle">
+    <div id="imageConfig">
       <strong>Subtitle:</strong>
       <input v-model="subtitle" style="width: 300px;">
+      <small>Use <code>\n</code> to break line</small>
 
       <strong>Font Size:</strong>
       <input type="number" min="10" max="50" step="1" v-model="fontSize" style="width: 60px;">
@@ -108,7 +114,8 @@
         <img :src="getImagePath(id)">
         <pre
           class="image-card-subtitle"
-          :style="{'font-size': imageSize * fontSize / 300 + 'px'}">{{ subtitle }}</pre>
+          :style="{'font-size': imageSize * fontSize / 300 + 'px'}"
+          v-html="formatedSubtitle"></pre>
       </div>
     </div>
 
@@ -146,6 +153,9 @@ var app = new Vue({
   computed: {
     IMAGE_COUNT()     { return 57 },
     IMAGE_ID_LENGTH() { return 3 },
+    formatedSubtitle() {
+      return this.subtitle.replace('\\n', '<br>');
+    },
   },
   methods: {
     getImagePath(id) {
