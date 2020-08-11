@@ -169,8 +169,8 @@ var app = new Vue({
         logging   : false,
         useCORS   : true,
         allowTaint: true,
-        width     : 300,
-        height    : 300,
+        width     : parseInt(this.imageSize),
+        height    : parseInt(this.imageSize),
         x         : el.offsetLeft,
         y         : el.offsetTop,
         ignoreElements: el => {
