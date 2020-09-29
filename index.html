@@ -96,7 +96,7 @@
 
 <body>
   <div id="app">
-    <div id="imageConfig" v-show="showImageConfig">
+    <div id="imageConfig">
       <strong>Subtitle:</strong>
       <input v-model="subtitle" style="width: 300px;">
       <small>Use <code>\n</code> to break line</small>
@@ -154,7 +154,6 @@ var app = new Vue({
     let imageTopic = localStorage.getItem('imageTopic');
 
     return {
-      showImageConfig: true,
       subtitle       : subtitle   || 'SHOW ME YOUR CODE',
       fontSize       : fontSize   || '25',
       imageSize      : imageSize  || '300',
@@ -203,11 +202,8 @@ var app = new Vue({
   methods: {
     closeSuccessInfo() {
       this.showSuccessInfo = false;
-      this.showImageConfig = true;
     },
     doCopy(url) {
-      this.showImageConfig = false;
-
       this.$nextTick(() => {
         var el = document.getElementById(url);
         let opt = {
