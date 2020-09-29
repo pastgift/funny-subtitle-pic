@@ -3,6 +3,7 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
   <script src="js/vue.min.js"></script>
+  <script src="js/axios.min.js"></script>
   <script src="js/html2canvas.min.js"></script>
   <script src="js/clipboard.min.js"></script>
   <title>Funny Subtitle Pic</title>
@@ -23,7 +24,8 @@
     background: whitesmoke;
     z-index   : 1;
   }
-  #imageConfig > input {
+  #imageConfig > input,
+  #imageConfig > select {
     font-size    : 20px;
     text-align   : center;
     border-radius: 7px;
@@ -100,18 +102,24 @@
       <strong>Image Size:</strong>
       <input type="number" min="100" max="500" step="10" v-model="imageSize" style="width: 60px;">
 
+      <strong>Topic:</strong>
+      <select v-model="imageTopic" style="width: 200px;">
+        <option value="">ALL</option>
+        <option v-for="topic in IMAGE_TOPIC" :key="topic" :value="topic">{{ topic }}</option>
+      </select>
+
       <strong id="hint">CLICK IMAGE TO COPY!</strong>
     </div>
 
     <div id="imagePreview">
       <div
         class="image-card"
-        v-for="id in IMAGE_COUNT"
+        v-for="url in IMAGE_LIST"
         :style="{'width': imageSize + 'px', 'height': imageSize + 'px'}"
-        :key="id"
-        :id="'image-' + id"
-        @click.stop="getPicBase64(id)">
-        <img :src="getImagePath(id)">
+        :key="url"
+        :id="url"
+        @click.stop="getPicBase64(url)">
+        <img :src="url">
         <pre
           class="image-card-subtitle"
           :style="{'font-size': imageSize * fontSize / 300 + 'px'}"
@@ -128,15 +136,19 @@
 var app = new Vue({
   el: '#app',
   data() {
-    let subtitle  = localStorage.getItem('subtitle');
-    let fontSize  = parseInt(localStorage.getItem('fontSize'));
-    let imageSize = parseInt(localStorage.getItem('imageSize'));
+    let subtitle   = localStorage.getItem('subtitle');
+    let fontSize   = parseInt(localStorage.getItem('fontSize'));
+    let imageSize  = parseInt(localStorage.getItem('imageSize'));
+    let imageTopic = localStorage.getItem('imageTopic');
 
     return {
-      subtitle       : subtitle  || 'SHOW ME YOUR CODE',
-      fontSize       : fontSize  || '25',
-      imageSize      : imageSize || '300',
+      subtitle       : subtitle   || 'SHOW ME YOUR CODE',
+      fontSize       : fontSize   || '25',
+      imageSize      : imageSize  || '300',
+      imageTopic     : imageTopic || '',
       showSuccessInfo: false,
+
+      imageIndex: [],
     }
   },
   watch: {
@@ -149,21 +161,35 @@ var app = new Vue({
     imageSize(val) {
       localStorage.setItem('imageSize', val);
     },
+    imageTopic(val) {
+      localStorage.setItem('imageTopic', val);
+    },
   },
   computed: {
-    IMAGE_COUNT()     { return 58 },
-    IMAGE_ID_LENGTH() { return 3 },
+    IMAGE_TOPIC() {
+      let topicMap = {};
+      this.imageIndex.forEach(d => {
+        let [_, topic, name] = d.split('/');
+        topicMap[topic] = true;
+      });
+      return Object.keys(topicMap);
+    },
+    IMAGE_LIST() {
+      let imageList = [];
+      this.imageIndex.forEach(d => {
+        let [_, topic, name] = d.split('/');
+        if (this.imageTopic && topic !== this.imageTopic) return;
+        imageList.push(d);
+      });
+      return imageList;
+    },
     formatedSubtitle() {
       return this.subtitle.replace('\\n', '<br>');
     },
   },
   methods: {
-    getImagePath(id) {
-      id = ('000' + id).slice(-3);
-      return 'img/' + id + '.jpg';
-    },
-    getPicBase64(id) {
-      var el = document.getElementById('image-' + id);
+    getPicBase64(url) {
+      var el = document.getElementById(url);
       let opt = {
         scale     : 1,
         logging   : false,
@@ -199,6 +225,13 @@ var app = new Vue({
         }, 1500);
       });
     },
+  },
+  mounted() {
+    axios.get('img-index.txt').then(resp => {
+      this.imageIndex = resp.data.split('\n').filter(d => d).sort();
+    });
+
+    window.vm = this;
   },
 });
 </script>
