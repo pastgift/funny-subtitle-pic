@@ -26,14 +26,14 @@
   }
   #imageConfig > input,
   #imageConfig > select {
-    font-size    : 20px;
+    font-size    : 18px;
     text-align   : center;
     border-radius: 7px;
     border       : 2px solid grey;
-    padding      : 5px;
+    padding      : 3px;
   }
   #imageConfig > strong {
-    margin-left: 20px;
+    margin-left: 18px;
   }
   #imageConfig > small {
     vertical-align: bottom;
@@ -41,7 +41,8 @@
   #hint {
     position: absolute;
     right: 50px;
-    font-size: 30px;
+    line-height: 30px;
+    font-size: 18px;
   }
   #imagePreview  {
   }
@@ -98,7 +99,7 @@
   <div id="app">
     <div id="imageConfig">
       <strong>Subtitle:</strong>
-      <input v-model="subtitle" style="width: 300px;">
+      <input v-model="subtitle" style="width: 220px;">
       <small>Use <code>\n</code> to break line</small>
 
       <strong>Font Size:</strong>
@@ -108,7 +109,7 @@
       <input type="number" min="100" max="500" step="10" v-model="imageSize" style="width: 60px;">
 
       <strong>Topic:</strong>
-      <select v-model="imageTopic" style="width: 200px;">
+      <select v-model="imageTopic" style="width: 150px;">
         <option value="">ALL</option>
         <option v-for="topic in IMAGE_TOPIC" :key="topic" :value="topic">{{ topic }}</option>
       </select>
