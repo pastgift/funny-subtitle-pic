@@ -118,3 +118,5 @@ img/03-Sophistry/053.jpg
 img/03-Sophistry/054.jpg
 img/04-Frieren/001.jpg
 img/04-Frieren/002.jpg
+img/04-Frieren/003.jpg
+img/04-Frieren/004.jpg
