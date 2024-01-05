@@ -16,7 +16,9 @@
     background : #202020;
   }
   #imageConfig {
-    display   : block;
+    display   : flex;
+    align-items: center;
+    justify-content: flex-start;
     position  : fixed;
     padding   : 10px;
     top       : 0;
@@ -24,18 +26,29 @@
     background: whitesmoke;
     z-index   : 1;
   }
-  #imageConfig > input,
   #imageConfig > select {
-    font-size: 16px;
-    border-radius: 7px;
-    border: 2px solid grey;
-    padding: 3px 5px;
+    height: 24px;
+  }
+  #imageConfig > input[type=checkbox] {
+    width: 24px;
+    height: 24px;
+  }
+  #imageConfig > input {
+    height: 20px;
+    font-size: 14px;
+    border-radius: 3px;
+    border: 1px solid grey;
+    padding-left: 10px;
+    padding-right: 10px;
   }
   #imageConfig > strong {
     margin-left: 18px;
   }
   #imageConfig > small {
     vertical-align: bottom;
+  }
+  #imageConfig > * {
+    margin-left: 5px;
   }
   #hint {
     position: absolute;
@@ -97,6 +110,12 @@
 <body>
   <div id="app">
     <div id="imageConfig">
+      <strong>Topic:</strong>
+      <select v-model="imageTopic" style="width: 200px;">
+        <option value="">ALL</option>
+        <option v-for="topic in IMAGE_TOPIC" :key="topic" :value="topic">{{ topic }}</option>
+      </select>
+
       <strong>Subtitle:</strong>
       <input v-model="useSubtitle" type="checkbox" />
       <input v-model="subtitle" style="width: 300px;">
@@ -107,12 +126,6 @@
 
       <strong>Image Size:</strong>
       <input type="number" min="100" max="500" step="10" v-model="imageSize" style="width: 60px;">
-
-      <strong>Topic:</strong>
-      <select v-model="imageTopic" style="width: 150px;">
-        <option value="">ALL</option>
-        <option v-for="topic in IMAGE_TOPIC" :key="topic" :value="topic">{{ topic }}</option>
-      </select>
 
       <strong id="hint">CLICK IMAGE TO COPY!</strong>
     </div>
@@ -150,24 +163,27 @@
 var app = new Vue({
   el: '#app',
   data() {
-    let useSubtitle = localStorage.getItem('useSubtitle') === 'true';
+    let imageTopic  = localStorage.getItem('imageTopic');
+    let useSubtitle = (localStorage.getItem('useSubtitle') || 'true') === 'true';
     let subtitle    = localStorage.getItem('subtitle');
     let fontSize    = parseInt(localStorage.getItem('fontSize'));
     let imageSize   = parseInt(localStorage.getItem('imageSize'));
-    let imageTopic  = localStorage.getItem('imageTopic');
 
     return {
+      imageTopic     : imageTopic  || '',
       useSubtitle    : useSubtitle || false,
       subtitle       : subtitle    || 'SHOW ME YOUR CODE',
       fontSize       : fontSize    || '25',
       imageSize      : imageSize   || '300',
-      imageTopic     : imageTopic  || '',
       showSuccessInfo: false,
 
       imageIndex: [],
     }
   },
   watch: {
+    imageTopic(val) {
+      localStorage.setItem('imageTopic', val);
+    },
     useSubtitle(val) {
       localStorage.setItem('useSubtitle', val);
     },
@@ -179,9 +195,6 @@ var app = new Vue({
     },
     imageSize(val) {
       localStorage.setItem('imageSize', val);
-    },
-    imageTopic(val) {
-      localStorage.setItem('imageTopic', val);
     },
   },
   computed: {
